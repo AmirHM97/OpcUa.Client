@@ -1,17 +1,17 @@
 ﻿public static class Program
 {
-    private static readonly string ServerUrl = "opc.tcp://Amirs-Zephyrus-G15:48020";
-    private static readonly string folderName = "Scalar";
-
     public static async Task Main(string[] args)
     {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
         var services = new ServiceCollection();
-        services.AddSingleton<IServerConnectionService>(new ServerConnectionService(ServerUrl));
-        services.AddSingleton<INodeBrowserService, NodeBrowserService>();
-        services.AddSingleton<OpcClientService>();
+        services.AddCoreServices(configuration);
 
         var serviceProvider = services.BuildServiceProvider();
         var clientApp = serviceProvider.GetService<OpcClientService>();
-        await clientApp.RunAsync(folderName);
+        await clientApp.RunAsync();
     }
 }

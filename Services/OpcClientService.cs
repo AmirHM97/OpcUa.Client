@@ -1,42 +1,48 @@
-﻿namespace OPCUA.Client.Services;
+﻿namespace OpcUa.Client.Services;
 
 public class OpcClientService
 {
     private readonly IServerConnectionService _serverConnection;
     private readonly INodeBrowserService _nodeBrowser;
+    private readonly ICircuitBreaker _circuitBreaker;
+    private readonly Models.ServerConfiguration _serverConfiguration;
 
-    public OpcClientService(IServerConnectionService serverConnection, INodeBrowserService nodeBrowser)
+    public OpcClientService(IServerConnectionService serverConnection, INodeBrowserService nodeBrowser, ICircuitBreaker circuitBreaker, Models.ServerConfiguration serverConfiguration)
     {
         _serverConnection = serverConnection;
         _nodeBrowser = nodeBrowser;
+        _circuitBreaker = circuitBreaker;
+        _serverConfiguration = serverConfiguration;
+    }
+    public async Task RunAsync()
+    {
+        var tasks = _serverConfiguration.Servers.Select(RetrieveDataFromServerAsync);
+        await Task.WhenAll(tasks);
     }
 
-    public async Task RunAsync(string folderName)
+    public async Task RetrieveDataFromServerAsync(Server server)
     {
-        using (Session session = await _serverConnection.ConnectAsync())
+        using (Session session = await _serverConnection.ConnectAsync(server.Url))
         {
-            Console.WriteLine("Connected to OPC UA server.");
+            Console.WriteLine($"Connected to OPC UA server: {server.Url}");
 
-           var scalarFolderNodeId = await _nodeBrowser.FindFolderNodeIdAsync(session, ObjectIds.ObjectsFolder, folderName);
+            var scalarFolderNodeId = await _nodeBrowser.FindFolderNodeIdAsync(session, ObjectIds.ObjectsFolder, server.FolderName);
 
             if (scalarFolderNodeId != null)
             {
                 var variableNodeIds = await _nodeBrowser.GetVariableNodeIdsAsync(session, scalarFolderNodeId);
 
-                Console.WriteLine("Retrieved Variables:");
+                Console.WriteLine($"Retrieved Variables from server {server.Url}:");
                 foreach (var nodeId in variableNodeIds)
                 {
-                   var value = await session.ReadValueAsync(nodeId);
-                    Console.WriteLine($"NodeId: {nodeId}, Value: {value.Value}");
+                    var value = await session.ReadValueAsync(nodeId);
+                    Console.WriteLine($"Server: {server.Url}, NodeId: {nodeId}, Value: {value.Value}");
                 }
             }
             else
             {
-                Console.WriteLine("The scalar folder could not be found.");
+                Console.WriteLine($"The Scalar folder could not be found on server: {server.Url}");
             }
         }
-
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
     }
 }

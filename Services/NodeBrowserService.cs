@@ -1,4 +1,4 @@
-﻿namespace OPCUA.Client.Services;
+﻿namespace OpcUa.Client.Services;
 
 public class NodeBrowserService : INodeBrowserService
 {

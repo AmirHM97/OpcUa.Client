@@ -1,4 +1,4 @@
-﻿namespace OPCUA.Client.Contracts;
+﻿namespace OpcUa.Client.Contracts;
 
 public interface INodeBrowserService
 {

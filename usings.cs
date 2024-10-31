@@ -1,6 +1,9 @@
-﻿global using Microsoft.Extensions.DependencyInjection;
+﻿global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 global using Opc.Ua;
 global using Opc.Ua.Client;
 global using Opc.Ua.Configuration;
-global using OPCUA.Client.Contracts;
-global using OPCUA.Client.Services;
+global using OpcUa.Client.Contracts;
+global using OpcUa.Client.Infrastructiure;
+global using OpcUa.Client.Services;
+global using OpcUa.Client.Models;

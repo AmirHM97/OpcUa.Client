@@ -1,17 +1,10 @@
-﻿namespace OPCUA.Client.Services;
+﻿namespace OpcUa.Client.Services;
 
 public class ServerConnectionService : IServerConnectionService
 {
-    private readonly string _serverUrl;
-
-    public ServerConnectionService(string serverUrl)
+    public async Task<Session> ConnectAsync(string serverUrl)
     {
-        _serverUrl = serverUrl;
-    }
-
-    public async Task<Session> ConnectAsync()
-    {
-        var application = new ApplicationInstance
+        ApplicationInstance application = new ApplicationInstance
         {
             ApplicationName = "OpcUaClientApp",
             ApplicationType = ApplicationType.Client
@@ -20,7 +13,7 @@ public class ServerConnectionService : IServerConnectionService
         await application.LoadApplicationConfiguration(false);
         await application.CheckApplicationInstanceCertificate(false, 0);
 
-        var selectedEndpoint = CoreClientUtils.SelectEndpoint(_serverUrl, useSecurity: false);
+        var selectedEndpoint = CoreClientUtils.SelectEndpoint(serverUrl, useSecurity: false);
         var endpointConfig = EndpointConfiguration.Create(application.ApplicationConfiguration);
         var endpoint = new ConfiguredEndpoint(null, selectedEndpoint, endpointConfig);
 
